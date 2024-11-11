@@ -37,7 +37,8 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
     scaler :GradScaler = kwargs.get('scaler', None)
     lr_warmup_scheduler :Warmup = kwargs.get('lr_warmup_scheduler', None)
 
-    for i, (samples, targets) in enumerate(metric_logger.log_every(data_loader, print_freq, header)):
+    # for i, (samples, targets) in enumerate(metric_logger.log_every(data_loader, print_freq, header)):
+    for i, (samples, targets) in enumerate(data_loader):
         samples = samples.to(device)
         targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
         global_step = epoch * len(data_loader) + i
@@ -132,7 +133,8 @@ def evaluate(model: torch.nn.Module, criterion: torch.nn.Module, postprocessor, 
     # coco_evaluator = CocoEvaluator(base_ds, iou_types)
     # coco_evaluator.coco_eval[iou_types[0]].params.iouThrs = [0, 0.1, 0.5, 0.75]
 
-    for samples, targets in metric_logger.log_every(data_loader, 10, header):
+    # for samples, targets in metric_logger.log_every(data_loader, 10, header):
+    for samples, targets in data_loader:
         samples = samples.to(device)
         targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
 

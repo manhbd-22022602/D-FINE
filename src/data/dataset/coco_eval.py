@@ -73,9 +73,10 @@ class CocoEvaluator(object):
             coco_eval.accumulate()
 
     def summarize(self):
-        for iou_type, coco_eval in self.coco_eval.items():
+        pass
+        # for iou_type, coco_eval in self.coco_eval.items():
             # print("IoU metric: {}".format(iou_type))
-            coco_eval.summarize()
+            # coco_eval.summarize()
 
     def prepare(self, predictions, iou_type):
         if iou_type == "bbox":
