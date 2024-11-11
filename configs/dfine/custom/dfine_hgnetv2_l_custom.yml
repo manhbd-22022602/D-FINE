@@ -32,13 +32,13 @@ optimizer:
 
 
 # Increase to search for the optimal ema
-epoches: 10 # 72 + 2n
+epoches: 5 # 72 + 2n
 train_dataloader:
   dataset:
     transforms:
       policy:
-        epoch: 8
+        epoch: 4
   collate_fn:
-    stop_epoch: 8
+    stop_epoch: 4
     ema_restart_decay: 0.9999
     base_size_repeat: 4
