@@ -43,7 +43,7 @@ class DetSolver(BaseSolver):
                 best_stat['epoch'] = self.last_epoch
                 best_stat[k] = test_stats[k][0]
                 top1 = test_stats[k][0]
-                print(f'best_stat: {best_stat}')
+                # print(f'best_stat: {best_stat}')
 
         start_time = time.time()
         start_epoch = self.last_epoch + 1
@@ -124,7 +124,7 @@ class DetSolver(BaseSolver):
                     self.load_resume_state(str(self.output_dir / 'best_stg1.pth'))
                     print(f'Refresh EMA at epoch {epoch} with decay {self.ema.decay}')
 
-            print(f'best_stat: {best_stat}')
+            # print(f'best_stat: {best_stat}')
 
             log_stats = {
                 **{f'train_{k}': v for k, v in train_stats.items()},
