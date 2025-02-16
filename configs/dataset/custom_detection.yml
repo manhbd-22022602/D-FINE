@@ -12,7 +12,7 @@ train_dataloader:
   dataset:
     type: CocoDetection
     img_folder: Student-Behavior-Merged-2/train
-    ann_file: Student-Behavior-Merged-2/train/train.json
+    ann_file: Student-Behavior-Merged-2/train/_annotations.coco.json
     return_masks: False
     transforms:
       type: Compose
@@ -28,8 +28,8 @@ val_dataloader:
   type: DataLoader
   dataset:
     type: CocoDetection
-    img_folder: Student-Behavior-Merged-2/val
-    ann_file: Student-Behavior-Merged-2/val/val.json
+    img_folder: Student-Behavior-Merged-2/valid
+    ann_file: Student-Behavior-Merged-2/valid/_annotations.coco.json
     return_masks: False
     transforms:
       type: Compose
