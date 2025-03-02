@@ -32,16 +32,38 @@ def draw(images, labels, boxes, scores, thrh=0.4):
         box = boxes[i][scr > thrh]
         scrs = scr[scr > thrh]
 
+        try:
+            from PIL import ImageFont
+            font = ImageFont.truetype("arial.ttf", 30)  # Tăng kích thước font lên 30
+        except:
+            font = None
+
         for j, b in enumerate(box):
             label = lab[j].item()
             class_info = list(class_colors.items())[label-1] if label-1 < len(class_colors) else ('unknown', (0, 0, 255))
             color = class_info[1]
             label = class_info[0]
-            draw.rectangle(list(b), outline=color, width=2)
+            
+            # Tăng độ dày của bounding box lên 4
+            draw.rectangle(list(b), outline=color, width=4)
+            
+            # Thêm background cho text label
+            text = f"{label} {round(scrs[j].item(), 2)}"
+            if font:
+                text_bbox = draw.textbbox((b[0], b[1]), text, font=font)
+            else:
+                text_bbox = draw.textbbox((b[0], b[1]), text)
+            
+            # Vẽ background cho text
+            draw.rectangle([text_bbox[0]-2, text_bbox[1]-2, text_bbox[2]+2, text_bbox[3]+2], 
+                         fill=color)
+            
+            # Vẽ text với font size lớn hơn và màu trắng
             draw.text(
                 (b[0], b[1]),
-                text=f"{label} {round(scrs[j].item(), 2)}",
-                fill=color
+                text=text,
+                fill=(255, 255, 255),  # Màu trắng cho text
+                font=font
             )
 
         im.save("torch_results.jpg")
