@@ -4,4 +4,5 @@ Student-Behavior-Merged-7
 Student-Behavior-Merged-7/*
 **/__pycache__/
 output/dfine_hgnetv2_s_custom/summary/*
-dfine_s_obj2coco.pth
+*.pth
+**/log.txt
