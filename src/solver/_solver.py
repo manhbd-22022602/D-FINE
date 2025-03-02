@@ -29,8 +29,7 @@ def remove_module_prefix(state_dict):
 class BaseSolver(object):
     def __init__(self, cfg: BaseConfig) -> None:
         self.cfg = cfg
-        self.obj365_ids = 
-        [
+        self.obj365_ids = [
             0,    # Person - cho lớp "distracted"
             0,    # Person - cho lớp "focused"
             0,    # Person - cho lớp "raising_hand"
