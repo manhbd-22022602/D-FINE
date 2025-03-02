@@ -6,3 +6,8 @@ Student-Behavior-Merged-7/*
 output/dfine_hgnetv2_s_custom/summary/*
 *.pth
 **/log.txt
+train.sh
+class_video.mp4
+torch_results.mp4
+torch_results.jpg
+download_video.py
