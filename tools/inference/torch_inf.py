@@ -34,7 +34,9 @@ def draw(images, labels, boxes, scores, thrh=0.4):
 
         for j, b in enumerate(box):
             label = lab[j].item()
-            color = class_colors.get(str(label), "red")  # Mặc định là màu đỏ nếu không tìm thấy class
+            class_info = list(class_colors.items())[label-1] if label-1 < len(class_colors) else ('unknown', (0, 0, 255))
+            color = class_info[1]
+            label = class_info[0]
             draw.rectangle(list(b), outline=color, width=2)
             draw.text(
                 (b[0], b[1]),
