@@ -67,16 +67,7 @@ def main(
         solver.val()
     else:
         solver.fit()
-        # Thêm code lưu model ở đây
-        if dist_utils.is_main_process():  # Chỉ lưu trên process chính
-            save_path = os.path.join(cfg.output_dir, 'final_model.pth')
-            torch.save({
-                'model_state_dict': solver.model.state_dict(),
-                'optimizer_state_dict': solver.optimizer.state_dict(),
-                'epoch': solver.epoch,
-            }, save_path)
-            print(f'Model saved to {save_path}')
-
+        
     dist_utils.cleanup()
 
 

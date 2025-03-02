@@ -49,15 +49,15 @@ optimizer:
 
 
 # Increase to search for the optimal ema
-epoches: 48 #220
+epoches: 1 #220
 train_dataloader:
   total_batch_size: 16
   dataset:
     transforms:
       policy:
-        epoch: 40 #200
+        epoch: 1 #200
   collate_fn:
-    stop_epoch: 8 #200
+    stop_epoch: 0 #200
     ema_restart_decay: 0.9999
     base_size_repeat: 20
 
