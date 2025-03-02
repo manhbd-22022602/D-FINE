@@ -26,46 +26,61 @@ def draw(images, labels, boxes, scores, thrh=0.4):
     }
 
     for i, im in enumerate(images):
-        draw = ImageDraw.Draw(im)
+        img_np = np.array(im)
         scr = scores[i]
         lab = labels[i][scr > thrh]
         box = boxes[i][scr > thrh]
         scrs = scr[scr > thrh]
 
-        try:
-            from PIL import ImageFont
-            font = ImageFont.truetype("arial.ttf", 30)  # Tăng kích thước font lên 30
-        except:
-            font = None
-
-        for j, b in enumerate(box):
-            label = lab[j].item()
-            class_info = list(class_colors.items())[label-1] if label-1 < len(class_colors) else ('unknown', (0, 0, 255))
-            color = class_info[1]
-            label = class_info[0]
+        for j, (b, label, score) in enumerate(zip(box, lab, scrs)):
+            x1, y1, x2, y2 = map(int, b)
+            class_id = int(label.item())
+            color = colors[class_id]
             
-            # Tăng độ dày của bounding box lên 4
-            draw.rectangle(list(b), outline=color, width=4)
+            # Get label text and size
+            text = f'{class_names[class_id]} {score.item():.2f}'
             
-            # Thêm background cho text label
-            text = f"{label} {round(scrs[j].item(), 2)}"
-            if font:
-                text_bbox = draw.textbbox((b[0], b[1]), text, font=font)
-            else:
-                text_bbox = draw.textbbox((b[0], b[1]), text)
-            
-            # Vẽ background cho text
-            draw.rectangle([text_bbox[0]-2, text_bbox[1]-2, text_bbox[2]+2, text_bbox[3]+2], 
-                         fill=color)
-            
-            # Vẽ text với font size lớn hơn và màu trắng
-            draw.text(
-                (b[0], b[1]),
-                text=text,
-                fill=(0, 0, 0),  # Màu trắng cho text
-                font=font
+            # Calculate text size and background rectangle size
+            font_scale = 0.6
+            font_thickness = 2
+            (text_width, text_height), baseline = cv2.getTextSize(
+                text, cv2.FONT_HERSHEY_SIMPLEX, font_scale, font_thickness
             )
-
+            
+            # Draw filled rectangle for text background with alpha blending
+            overlay = img_np.copy()
+            
+            # Draw main bounding box with slightly transparent fill
+            cv2.rectangle(overlay, (x1, y1), (x2, y2), color, 2)
+            cv2.rectangle(overlay, (x1, y1), (x2, y2), color, -1)
+            
+            # Draw text background
+            cv2.rectangle(
+                overlay, 
+                (x1, y1 - text_height - 10), 
+                (x1 + text_width + 10, y1),
+                color, 
+                -1
+            )
+            
+            # Apply alpha blending
+            alpha = 0.3
+            img_np = cv2.addWeighted(overlay, alpha, img_np, 1 - alpha, 0)
+            
+            # Draw solid border for bounding box
+            cv2.rectangle(img_np, (x1, y1), (x2, y2), color, 2)
+            
+            # Draw white text
+            cv2.putText(
+                img_np, 
+                text,
+                (x1 + 5, y1 - 5),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                font_scale,
+                (255, 255, 255),
+                font_thickness
+            )
+        im = Image.fromarray(img_np)
         im.save("torch_results.jpg")
 
 
