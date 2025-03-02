@@ -62,7 +62,7 @@ def draw(images, labels, boxes, scores, thrh=0.4):
             draw.text(
                 (b[0], b[1]),
                 text=text,
-                fill=(255, 255, 255),  # Màu trắng cho text
+                fill=(0, 0, 0),  # Màu trắng cho text
                 font=font
             )
 
