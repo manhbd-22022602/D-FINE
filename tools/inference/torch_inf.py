@@ -17,12 +17,21 @@ from src.core import YAMLConfig
 
 
 def draw(images, labels, boxes, scores, thrh=0.4):
-    class_colors = {
-        'distracted': (0, 0, 255),    # đỏ
-        'focused': (128, 0, 128),     # tím
-        'raising_hand': (255, 165, 0), # cam
-        'sleep': (255, 255, 0),       # vàng
-        'using_phone': (255, 0, 0)    # xanh dương
+    class_names = {
+        1: 'distracted',
+        2: 'focused',
+        3: 'raising_hand',
+        4: 'sleep',
+        5: 'using_phone'
+    }
+    
+    # Define colors for each class (in RGB format)
+    colors = {
+        1: (0, 0, 255),  # đỏ
+        2: (128, 0, 128),  # tím
+        3: (255, 165, 0),     # cam
+        4: (255, 255, 0),  # vàng
+        5: (255, 0, 0)   # xanh dương
     }
 
     for i, im in enumerate(images):
