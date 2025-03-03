@@ -43,14 +43,14 @@ def draw(images, labels, boxes, scores, thrh=0.4):
 
         for j, b in enumerate(box):
             label = lab[j].item()
-            draw.rectangle(list(b), outline=colors[label], width=20)
+            draw.rectangle(list(b), outline=colors[label], width=10)
             draw.text(
                 (b[0], b[1]),
                 text=f"{class_names[label]} {round(scrs[j].item(), 2)}",
-                fill="blue",
+                fill="white",
             )
 
-        im.save("torch_results.jpg")
+        im.save("torch_results1.jpg")
 
 def process_image(model, device, file_path):
     im_pil = Image.open(file_path).convert("RGB")
