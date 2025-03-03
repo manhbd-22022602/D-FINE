@@ -17,81 +17,23 @@ from src.core import YAMLConfig
 
 
 def draw(images, labels, boxes, scores, thrh=0.4):
-    class_names = {
-        1: 'distracted',
-        2: 'focused',
-        3: 'raising_hand',
-        4: 'sleep',
-        5: 'using_phone'
-    }
-    
-    # Define colors for each class (in RGB format)
-    colors = {
-        1: (0, 0, 255),  # đỏ
-        2: (128, 0, 128),  # tím
-        3: (255, 165, 0),     # cam
-        4: (255, 255, 0),  # vàng
-        5: (255, 0, 0)   # xanh dương
-    }
-
     for i, im in enumerate(images):
-        img_np = np.array(im)
+        draw = ImageDraw.Draw(im)
+
         scr = scores[i]
         lab = labels[i][scr > thrh]
         box = boxes[i][scr > thrh]
         scrs = scr[scr > thrh]
 
-        for j, (b, label, score) in enumerate(zip(box, lab, scrs)):
-            x1, y1, x2, y2 = map(int, b)
-            class_id = int(label.item())
-            color = colors[class_id]
-            
-            # Get label text and size
-            text = f'{class_names[class_id]} {score.item():.2f}'
-            
-            # Calculate text size and background rectangle size
-            font_scale = 0.6
-            font_thickness = 2
-            (text_width, text_height), baseline = cv2.getTextSize(
-                text, cv2.FONT_HERSHEY_SIMPLEX, font_scale, font_thickness
+        for j, b in enumerate(box):
+            draw.rectangle(list(b), outline="red")
+            draw.text(
+                (b[0], b[1]),
+                text=f"{lab[j].item()} {round(scrs[j].item(), 2)}",
+                fill="blue",
             )
-            
-            # Draw filled rectangle for text background with alpha blending
-            overlay = img_np.copy()
-            
-            # Draw main bounding box with slightly transparent fill
-            cv2.rectangle(overlay, (x1, y1), (x2, y2), color, 2)
-            cv2.rectangle(overlay, (x1, y1), (x2, y2), color, -1)
-            
-            # Draw text background
-            cv2.rectangle(
-                overlay, 
-                (x1, y1 - text_height - 10), 
-                (x1 + text_width + 10, y1),
-                color, 
-                -1
-            )
-            
-            # Apply alpha blending
-            alpha = 0.3
-            img_np = cv2.addWeighted(overlay, alpha, img_np, 1 - alpha, 0)
-            
-            # Draw solid border for bounding box
-            cv2.rectangle(img_np, (x1, y1), (x2, y2), color, 2)
-            
-            # Draw white text
-            cv2.putText(
-                img_np, 
-                text,
-                (x1 + 5, y1 - 5),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                font_scale,
-                (255, 255, 255),
-                font_thickness
-            )
-        im = Image.fromarray(img_np)
-        im.save("torch_results.jpg")
 
+        im.save("torch_results.jpg")
 
 def process_image(model, device, file_path):
     im_pil = Image.open(file_path).convert("RGB")
