@@ -17,6 +17,22 @@ from src.core import YAMLConfig
 
 
 def draw(images, labels, boxes, scores, thrh=0.4):
+    class_names = {
+        1: 'distracted',
+        2: 'focused',
+        3: 'raising_hand',
+        4: 'sleep',
+        5: 'using_phone'
+    }
+    
+    colors = {
+        1: (0, 0, 255),  # đỏ
+        2: (128, 0, 128),  # tím
+        3: (255, 165, 0),     # cam
+        4: (255, 255, 0),  # vàng
+        5: (255, 0, 0)   # xanh dương
+    }
+    
     for i, im in enumerate(images):
         draw = ImageDraw.Draw(im)
 
@@ -26,10 +42,11 @@ def draw(images, labels, boxes, scores, thrh=0.4):
         scrs = scr[scr > thrh]
 
         for j, b in enumerate(box):
-            draw.rectangle(list(b), outline="red")
+            label = lab[j].item()
+            draw.rectangle(list(b), outline=colors[label], width=20)
             draw.text(
                 (b[0], b[1]),
-                text=f"{lab[j].item()} {round(scrs[j].item(), 2)}",
+                text=f"{class_names[label]} {round(scrs[j].item(), 2)}",
                 fill="blue",
             )
 
