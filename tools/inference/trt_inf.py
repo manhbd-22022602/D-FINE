@@ -122,6 +122,14 @@ class TRTInference(object):
 
 
 def draw(images, labels, boxes, scores, thrh=0.4):
+    class_colors = {
+        'distracted': (0, 0, 255),    # đỏ
+        'focused': (128, 0, 128),     # tím
+        'raising_hand': (255, 165, 0), # cam
+        'sleep': (255, 255, 0),       # vàng
+        'using_phone': (255, 0, 0)    # xanh dương
+    }
+
     for i, im in enumerate(images):
         draw = ImageDraw.Draw(im)
         scr = scores[i]
@@ -130,11 +138,13 @@ def draw(images, labels, boxes, scores, thrh=0.4):
         scrs = scr[scr > thrh]
 
         for j, b in enumerate(box):
-            draw.rectangle(list(b), outline="red")
+            label = lab[j].item()
+            color = class_colors.get(str(label), "red")
+            draw.rectangle(list(b), outline=color, width=2)
             draw.text(
                 (b[0], b[1]),
-                text=f"{lab[j].item()} {round(scrs[j].item(), 2)}",
-                fill="blue",
+                text=f"{label} {round(scrs[j].item(), 2)}",
+                fill=color
             )
 
     return images
@@ -164,63 +174,73 @@ def process_image(m, file_path, device):
     print("Image processing complete. Result saved as 'result.jpg'.")
 
 
-def process_video(m, file_path, device):
+def process_video(m, file_path, device, interval_seconds=5):
     cap = cv2.VideoCapture(file_path)
 
-    # Get video properties
+    # Lấy thông tin video
     fps = cap.get(cv2.CAP_PROP_FPS)
+    frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    duration = frame_count / fps
     orig_w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     orig_h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    
+    print(f"FPS: {fps}")
+    print(f"Tổng số frame: {frame_count}")
+    print(f"Thời lượng video: {duration:.2f} giây")
+    print(f"Kích thước frame gốc: {orig_w}x{orig_h}")
+
+    # Số frame cần bỏ qua giữa mỗi lần inference
+    frames_to_skip = int(fps * interval_seconds)
 
     # Define the codec and create VideoWriter object
     fourcc = cv2.VideoWriter_fourcc(*"mp4v")
     out = cv2.VideoWriter("trt_result.mp4", fourcc, fps, (orig_w, orig_h))
 
-    transforms = T.Compose(
-        [
-            T.Resize((640, 640)),
-            T.ToTensor(),
-        ]
-    )
+    transforms = T.Compose([
+        T.Resize((640, 640)),
+        T.ToTensor(),
+    ])
 
     frame_count = 0
     print("Processing video frames...")
+    
     while cap.isOpened():
         ret, frame = cap.read()
         if not ret:
             break
 
-        # Convert frame to PIL image
-        frame_pil = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+        # Chỉ xử lý frame khi đến đúng khoảng thời gian
+        if frame_count % frames_to_skip == 0:
+            # Convert frame to PIL image
+            frame_pil = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+            
+            w, h = frame_pil.size
+            orig_size = torch.tensor([w, h])[None].to(device)
 
-        w, h = frame_pil.size
-        orig_size = torch.tensor([w, h])[None].to(device)
+            im_data = transforms(frame_pil)[None]
 
-        im_data = transforms(frame_pil)[None]
+            blob = {
+                "images": im_data.to(device),
+                "orig_target_sizes": orig_size.to(device),
+            }
 
-        blob = {
-            "images": im_data.to(device),
-            "orig_target_sizes": orig_size.to(device),
-        }
-
-        output = m(blob)
-
-        # Draw detections on the frame
-        result_images = draw([frame_pil], output["labels"], output["boxes"], output["scores"])
-
-        # Convert back to OpenCV image
-        frame = cv2.cvtColor(np.array(result_images[0]), cv2.COLOR_RGB2BGR)
+            output = m(blob)
+            
+            # Draw detections on the frame
+            result_images = draw([frame_pil], output["labels"], output["boxes"], output["scores"])
+            
+            # Convert back to OpenCV image
+            frame = cv2.cvtColor(np.array(result_images[0]), cv2.COLOR_RGB2BGR)
+            
+            print(f"Processed frame at {frame_count/fps:.2f} seconds")
 
         # Write the frame
         out.write(frame)
         frame_count += 1
 
-        if frame_count % 10 == 0:
-            print(f"Processed {frame_count} frames...")
-
     cap.release()
     out.release()
-    print("Video processing complete. Result saved as 'result_video.mp4'.")
+    print("Video processing complete. Result saved as 'trt_result.mp4'.")
 
 
 if __name__ == "__main__":
